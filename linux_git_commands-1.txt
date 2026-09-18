@@ -1,0 +1,28 @@
+STEP 1: mkdir -p ~/agentic_ai/{prompts,traces,logs}
+
+STEP 2: cd ~/agentic_ai/logs
+
+STEP 3: vi agent_trace.txt
+
+(Type inside vi) Deployed a multi-agent workflow where the planner agent
+delegates sub-tasks to tool-calling agents.
+
+(Save with ESC :wq)
+
+STEP 4: echo “MCP based tool integration removed most of the manual API
+glue code from the pipeline.” >> agent_trace.txt
+
+STEP 5: chmod 750 agent_trace.txt
+
+STEP 6: git init
+
+STEP 7: git remote add origin
+https://github.com/your-username/agentic_workflow_1234.git
+
+STEP 8: git add agent_trace.txt
+
+STEP 9: git commit -m “first commit”
+
+STEP 10: git branch -M main
+
+STEP 11: git push -u origin main
