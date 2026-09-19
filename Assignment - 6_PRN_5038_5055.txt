@@ -1,0 +1,444 @@
+ASSIGNMENT - 6
+
+31. Practice creating following tables
+
+create table mydept_DBDA
+(
+deptid number primary key,
+dname varchar2(20) not null unique,
+dloc varchar2(20)
+)
+
+insert into mydept_DBDA values(30,'Purchase','Mumbai');
+
+create table myemployee
+(
+empno number(5) primary key,
+fname varchar2(15) not null,
+mname varchar2(15),
+lname varchar2(15) not null,
+sal number(9,2) check(sal >=1000),
+doj date default sysdate,
+passportnum varchar2(15) unique,
+
+deptno number constraint fk_deptno references mydept_DBDA(deptid) on delete
+cascade
+)
+
+Ans:
+mysql> create table mydept_DBDA
+    -> ( deptid int primary key,
+    -> dname varchar(20) not null unique,
+    -> dloc varchar(20));
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> insert into mydept_DBDA values(30, 'Purchase', 'Mumbai');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from mydept_DBDA;
++--------+----------+--------+
+| deptid | dname    | dloc   |
++--------+----------+--------+
+|     30 | Purchase | Mumbai |
++--------+----------+--------+
+1 row in set (0.00 sec)
+
+mysql> create table myemployee(
+    -> empno int primary key,
+    -> fname varchar(15) not null,
+    -> mname varchar(15),
+    -> lname varchar(15) not null,
+    -> sal int check(sal >= 1000),
+    -> doj DATETIME DEFAULT CURRENT_TIMESTAMP,
+    -> passportnum varchar(15) unique,
+    -> depid int,
+    -> constraint fk_deptno foreign key(depid) references mydept_DBDA(deptid) on delete cascade);
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> desc myemployee;
++-------------+-------------+------+-----+-------------------+-------------------+
+| Field       | Type        | Null | Key | Default           | Extra             |
++-------------+-------------+------+-----+-------------------+-------------------+
+| empno       | int         | NO   | PRI | NULL              |                   |
+| fname       | varchar(15) | NO   |     | NULL              |                   |
+| mname       | varchar(15) | YES  |     | NULL              |                   |
+| lname       | varchar(15) | NO   |     | NULL              |                   |
+| sal         | int         | YES  |     | NULL              |                   |
+| doj         | datetime    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| passportnum | varchar(15) | YES  | UNI | NULL              |                   |
+| depid       | int         | YES  | MUL | NULL              |                   |
++-------------+-------------+------+-----+-------------------+-------------------+
+8 rows in set (0.01 sec)
+
+32. Create following tables Student, Course
+
+Student (sid,sname) ---------------- sid ---primary key
+Course(cid,cname)-------------- cid ---primary key
+
+Marks(studid,coursed,marks)
+Sample data for marks table
+studid,courseid,marks
+1 1 99
+1 3 98
+2 1 95
+2 2 97
+
+create table marks(
+studid number,
+courseid number,
+marks number,
+constraint pk primary key(studid,courseid),
+constraint fk_sid foreign key (studid) references student(sid) on delete set null,
+constraint fk_cid foreign key (courseid) references course(cid)
+)
+
+Ans:  create table student(
+    -> sid int primary key,
+    -> sname varchar(20));
+
+	create table course(
+    -> cid int primary key,
+    -> cname varchar(20));
+
+	create table marks(
+    -> studid int,
+    -> courseid int,
+    -> marks int,
+    -> constraint fk_stuid foreign key(studid) references student(sid),
+    -> constraint fk_couid foreign key(courseid) references course(cid),
+    -> constraint pk_sici primary key(studid,courseid));
+
+	insert into marks values (1,1,99),(1,3,98),(2,1,95),(2,2,97);
+
+33. Create empty table emp10 with table structure same as emp table.
+
+create table emp10 as
+(
+select *
+from emp
+where 1=2;
+)
+
+Ans:  create table emp10 as (
+    -> select * from emp
+    -> where 1 = 2);
+	
+
+34. Solve following using alter table
+add primary key constraint on emp,dept,salgrade
+emp ---- empno
+dept--- deptno
+salgrade--- grade
+add foreign key constarint in emp
+deptno --->> dept(deptno)
+add new column in emp table netsal with constraint default 1000
+
+Ans: alter table emp
+    -> add primary key(empno)
+    -> ;
+	
+	 alter table dept
+    -> add primary key(deptno);
+	
+	alter table salgrade
+    -> add primary key(grade);
+
+	alter table emp
+    -> add constraint fk_dept foreign key(deptno) references dept(deptno);
+
+	 alter table emp
+    -> add netsal int default 1000;
+
+35. Update employee sal ---- increase sal of each employee by 15 % sal +comm, change the job
+to manager and mgr to 7777 for all employees in deptno 10.
+Ans:  update emp
+    -> set sal = sal+0.15*sal+ifnull(comm,0);
+    update emp
+    -> set job = 'manager',mgr=7777
+    -> where deptno=10;
+
+36. change job of smith to senior clerk
+Ans: alter table emp modify job varchar(15);
+     update emp
+    -> set job = 'Senior Clerk'
+    -> where ename = 'Smith'; 
+
+37. increase salary of all employees by 15% if they are earning some commission
+Ans: select ename,round(sal+.15*sal,2) as NEWsal from emp where comm is not null ;
+
+38. list all employees with sal>smith's sal
+Ans: select * from emp where sal > (select sal from emp where ename='Smith');
+
+39. list all employees who are working in smith's department
+Ans: select * from emp where deptno = (select deptno from emp where ename='Smith');
+
+40. list all employees with sal < rajan's sal and salary > revati's sal
+Ans:  select * from emp where sal between (
+    -> select sal from emp where ename='Rajan') and (
+    -> select sal from emp where ename='Revati');
+
+Classwork JOINS
+
+mysql> insert into orders values(1,1,'2026-06-30'),(2,2,'2026-09-09'),(3,4,'2026-01-03'),(4,5,'2026-11-02'),(5,2,'2026-12-12');
+Query OK, 5 rows affected (0.02 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select * from orders;
++----------+-------------+------------+
+| order_id | customer_id | order_date |
++----------+-------------+------------+
+|        1 |           1 | 2026-06-30 |
+|        2 |           2 | 2026-09-09 |
+|        3 |           4 | 2026-01-03 |
+|        4 |           5 | 2026-11-02 |
+|        5 |           2 | 2026-12-12 |
++----------+-------------+------------+
+5 rows in set (0.00 sec)
+
+mysql> insert into suppliers values(1,'Shinchan','Kasukabe','Tokyo'),(2,'Batman','Gotham','New Jersey'),(3,'Spiderman','Queens','New York'),(4,'Harry Potter','Hogwarts','Surrey'),(5,'Jon Snow','Winterfell','Westeros');
+Query OK, 5 rows affected (0.02 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select * from suppliers;
++-------------+---------------+------------+------------+
+| supplier_id | supplier_name | city       | state      |
++-------------+---------------+------------+------------+
+|           1 | Shinchan      | Kasukabe   | Tokyo      |
+|           2 | Batman        | Gotham     | New Jersey |
+|           3 | Spiderman     | Queens     | New York   |
+|           4 | Harry Potter  | Hogwarts   | Surrey     |
+|           5 | Jon Snow      | Winterfell | Westeros   |
++-------------+---------------+------------+------------+
+5 rows in set (0.00 sec)
+
+mysql> insert into order_supplier values(1,4),(3,2),(5,3),(1,5),(2,3);
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select * from order_supplier;
++-------+---------+
+| or_id | supp_id |
++-------+---------+
+|     1 |       4 |
+|     3 |       2 |
+|     5 |       3 |
+|     1 |       5 |
+|     2 |       3 |
++-------+---------+
+5 rows in set (0.00 sec)
+
+mysql> select o.order_id,o.order_date,c.first_name,c.last_name from orders as o inner join customers as c on o.customer_id = c.customer_id where month(o.order_date) = 9;
++----------+------------+------------+-----------+
+| order_id | order_date | first_name | last_name |
++----------+------------+------------+-----------+
+|        2 | 2026-09-09 | Virat      | Kohli     |
++----------+------------+------------+-----------+
+1 row in set (0.01 sec)
+
+mysql> select o.order_id, o.order_date, s.supplier_name
+    -> from orders as o inner join order_supplier as os
+    -> on o.order_id = os.or_id inner join suppliers as s
+    -> on s.supplier_id = os.supp_id
+    -> where s.city in ('Gotham', 'Hogwarts');
++----------+------------+---------------+
+| order_id | order_date | supplier_name |
++----------+------------+---------------+
+|        3 | 2026-01-03 | Batman        |
+|        1 | 2026-06-30 | Harry Potter  |
++----------+------------+---------------+
+2 rows in set (0.00 sec)
+
+mysql> select concat(c.first_name, ' ',c.last_name)
+    -> from customers as c inner join orders o
+    -> on c.customer_id = o.customer_id inner join
+    -> order_supplier as os
+    -> on os.or
+    -> _id = o.order_id inner join
+    -> suppliers as s
+    -> on s.supplier
+    -> _id = os.supp_id
+    -> where s.city in ('Queens','Westeros');
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '_id = o.order_id inner join
+suppliers as s
+on s.supplier
+_id = os.supp_id
+whe' at line 6
+mysql> select concat(c.first_name, ' ',c.last_name)
+    -> from customers as c inner join orders o
+    -> on c.customer_id = o.customer_id inner join
+    -> order_supplier as os
+    -> on os.or_id = o.order_id
+    -> inner join suppliers as s
+    -> on s.supplier_id = os.supp_id
+    -> where s.city in ('Queens','Westeros');
++---------------------------------------+
+| concat(c.first_name, ' ',c.last_name) |
++---------------------------------------+
+| Virat Kohli                           |
+| Virat Kohli                           |
++---------------------------------------+
+2 rows in set (0.01 sec)
+
+mysql> select concat(first_name, ' ', last_name) as full_name from customers where fav_website like '%amazon.com%';
++-------------+
+| full_name   |
++-------------+
+| Virat Kohli |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select s.supplier_name, c.first_name, o.order_date
+    -> from customers as c inner join orders as o
+    -> on c.customer_id = o.customer_id inner join order_supplier as os
+    -> on os.or
+    -> ;
+ERROR 1054 (42S22): Unknown column 's.supplier_name' in 'field list'
+mysql> select s.supplier_name, c.first_name, o.order_date
+    -> from customers as c inner join orders as o
+    -> on c.customer_id = o.customer_id inner join order_supplier as os
+    -> on os.or_id = o.order_id inner join suppliers as s
+    -> on os.supp_id = s.supplier_id;
++---------------+------------+------------+
+| supplier_name | first_name | order_date |
++---------------+------------+------------+
+| Harry Potter  | Rohit      | 2026-06-30 |
+| Jon Snow      | Rohit      | 2026-06-30 |
+| Spiderman     | Virat      | 2026-09-09 |
+| Spiderman     | Virat      | 2026-12-12 |
+| Batman        | Hardik     | 2026-01-03 |
++---------------+------------+------------+
+5 rows in set (0.00 sec)
+
+mysql> select s.supplier_name, c.first_name
+    -> from customers as c inner join orders as o
+    -> on c.customer_id = o.customer_id inner join order_supplier as os
+    -> on os.or_id = o.order_id inner join suppliers as s
+    -> on s.supplier_id = os.supp_id
+    -> where c.fav_website like '%amazon.com%' and month(o.order_date) = 9;
++---------------+------------+
+| supplier_name | first_name |
++---------------+------------+
+| Spiderman     | Virat      |
++---------------+------------+
+1 row in set (0.00 sec)
+
+mysql> select concat(first_name, ' ',last_name) from customers
+    -> where customer_id in (select customer_id from orders where order_date between curdate() and date_sub(curdate(),interval 3 month));
+Empty set (0.01 sec)
+
+mysql> select concat(first_name, ' ',last_name) from customers
+    -> where customer_id in (select customer_id from orders where order_date between date_sub(curdate(),interval 3 month) and curdate());
++-----------------------------------+
+| concat(first_name, ' ',last_name) |
++-----------------------------------+
+| Rohit Sharma                      |
++-----------------------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from orders
+    -> where order_id in (
+    -> select or_id from order_supplier where supp_id in ( select supplier_id from suppliers where supplier_name in ('Batman', 'Jon Snow')));
++----------+-------------+------------+
+| order_id | customer_id | order_date |
++----------+-------------+------------+
+|        3 |           4 | 2026-01-03 |
+|        1 |           1 | 2026-06-30 |
++----------+-------------+------------+
+2 rows in set (0.00 sec)
+
+mysql> select supplier_id, or_id, null as customer_id
+    -> from suppliers as s left join order_supplier as os
+    -> on s.supplier_id = os.supp_id
+    -> where o.or_id is null
+    -> union
+    -> select null, order_id, customer_id
+    -> from customers as c left join orders as o
+    -> on c.customer_id = o.customer_id
+    -> where o.order_id is null;
+ERROR 1054 (42S22): Unknown column 'o.or_id' in 'where clause'
+mysql> select supplier_id, or_id, null as customer_id
+    -> from suppliers as s left join order_supplier as os
+    -> on s.supplier_id = os.supp_id
+    -> where os.or_id is null
+    -> union
+    -> select null, order_id, customer_id
+    -> from customers as c left join orders as o
+    -> on c.customer_id = o.customer_id
+    -> where o.order_id is null;
+ERROR 1052 (23000): Column 'customer_id' in field list is ambiguous
+mysql> select supplier_id, or_id, null
+    -> from suppliers as s left join order_supplier as os
+    -> on s.supplier_id = os.supp_id
+    -> where os.or_id is null
+    -> union
+    -> select null, order_id, customer_id
+    -> from customers as c left join orders as o
+    -> on c.customer_id = o.customer_id
+    -> where o.order_id is null;
+ERROR 1052 (23000): Column 'customer_id' in field list is ambiguous
+mysql> select supplier_id, or_id, null
+    -> from suppliers as s left join order_supplier as os
+    -> on s.supplier_id = os.supp_id
+    -> where os.or_id is null
+    -> union
+    -> select null, order_id, customer_id
+    -> ;
+ERROR 1054 (42S22): Unknown column 'order_id' in 'field list'
+mysql> select supplier_id, or_id, null
+    -> from suppliers as s left join order_supplier as os
+    -> on s.supplier_id = os.supp_id
+    -> where os.or_id is null
+    -> union
+    -> select null, order_id, c.customer_id
+    -> from customers as c left join orders as o
+    -> on c.customer_id = o.customer_id
+    -> where o.order_id is null;
++-------------+-------+------+
+| supplier_id | or_id | NULL |
++-------------+-------+------+
+|           1 |  NULL | NULL |
+|        NULL |  NULL |    3 |
++-------------+-------+------+
+2 rows in set (0.00 sec)
+
+mysql> select supplier_id, or_id, null as customer_id
+    -> from suppliers as s left join order_supplier as os
+    -> on s.supplier_id = os.supp_id
+    -> where os.or_id is null
+    -> union
+    -> select null, order_id, c.customer_id
+    -> from customers as c left join orders as o
+    -> on c.customer_id = o.customer_id
+    -> where o.order_id is null;
++-------------+-------+-------------+
+| supplier_id | or_id | customer_id |
++-------------+-------+-------------+
+|           1 |  NULL |        NULL |
+|        NULL |  NULL |           3 |
++-------------+-------+-------------+
+2 rows in set (0.00 sec)
+
+mysql> select order_id, order_date
+    -> from orders
+    -> where customer_id in (
+    -> select customer_id from customers
+    -> where fav_website like '%.in%');
+Empty set (0.00 sec)
+
+mysql> select order_id, order_date
+    -> from orders
+    -> where customer_id in (
+    -> select customer_id from customers
+    -> where fav_website like '%.com%');
++----------+------------+
+| order_id | order_date |
++----------+------------+
+|        1 | 2026-06-30 |
+|        2 | 2026-09-09 |
+|        5 | 2026-12-12 |
+|        3 | 2026-01-03 |
+|        4 | 2026-11-02 |
++----------+------------+
+5 rows in set (0.00 sec)
+
+mysql>
